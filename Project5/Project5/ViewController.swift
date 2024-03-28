@@ -87,7 +87,7 @@ class ViewController: UITableViewController {
     }
     
     /*
-     This method is called when an action is performed on a specific row in the table view. Here, you're interested in the copy action. When the copy action is performed:
+     This method is called when an action is performed on a specific row in the table view. Here, When the copy action is performed:
 
      The text of the cell (from the useWords array at the corresponding indexPath.row) is copied to the general pasteboard using UIPasteboard.general.string.
      */
