@@ -18,7 +18,10 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // add button.
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(promptForAnswer))
+        // refresh button.
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(startGame))
         
         /*
          => Bundle.main: Accesses the main bundle of the application,
@@ -36,7 +39,6 @@ class ViewController: UITableViewController {
                 allWords = startWord.components(separatedBy: "\n")
             }
         }
-
         // for protection.
         if allWords.isEmpty {
             allWords = ["silkworm"]
@@ -44,13 +46,6 @@ class ViewController: UITableViewController {
         startGame()
     }
 
-    func startGame() {
-        title = allWords.randomElement()
-        useWords.removeAll(keepingCapacity: true)
-        // telling the table view to refresh its data and update its display.
-        tableView.reloadData()
-    }
-    
     // returns an Int. It specifies the number of rows in a given section of the table view.
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         useWords.count
@@ -67,12 +62,20 @@ class ViewController: UITableViewController {
          When a new row comes into view at the bottom, the system dequeues one of the previously used cells from the pool, reconfigures it with new data, and displays it as the new bottom row.
          */
         let cell = tableView.dequeueReusableCell(withIdentifier: "Word", for: indexPath)
-        
+
         /* is responsible for setting the text of the textLabel property of the dequeued cell based on the data from the useWords array. */
         cell.textLabel?.text = useWords[indexPath.row]
-        
+
         // returns the configured cell to be displayed.
         return cell
+    }
+
+
+    @objc func startGame() {
+        title = allWords.randomElement()
+        useWords.removeAll(keepingCapacity: true)
+        // telling the table view to refresh its data and update its display.
+        tableView.reloadData()
     }
     
     @objc func  promptForAnswer() {
@@ -105,7 +108,7 @@ class ViewController: UITableViewController {
     func submit(_ answer: String) {
         // lowercased the answer.
         let lowAnswer = answer.lowercased()
-        
+
         // checks the answers before insert in the row.
         if isPossible(word: lowAnswer) {
             if isOriginal(word: lowAnswer) {
@@ -115,18 +118,29 @@ class ViewController: UITableViewController {
                     // the answer will be the first one.
                     let indexPath = IndexPath(row: 0, section: 0)
                     tableView.insertRows(at: [indexPath], with: .automatic)
+                    
+                    return
+                } else {
+                     showErrorMessage(title: "Word not recognised", message: "You can't just make them up, you know!")
                 }
+            } else {
+                showErrorMessage(title: "Word used already", message: "Be more Original!")
             }
+        } else {
+            // guard the title because it's an optional variable.
+            guard let title = title?.lowercased() else {
+                return
+            }
+            showErrorMessage(title: "Word Not Possible", message: "You can't Spell that Word form \(title)")
         }
-        
-        
     }
-    
+
     func isPossible(word: String) -> Bool {
         guard var tempWord = title?.lowercased() else {
             return false
         }
         for letter in word {
+            // Checks if the current letter exists in tempWord.
             if let position = tempWord.firstIndex(of: letter) {
                 tempWord.remove(at: position)
             } else {
@@ -137,16 +151,36 @@ class ViewController: UITableViewController {
     }
     
     func isOriginal(word: String) -> Bool {
+        // If word is not in useWords, it returns true; otherwise, it returns false.
         return !useWords.contains(word)
     }
     
     func isReal(word: String) -> Bool {
+        
+        if word.count < 3 {
+            return false
+        }
+        
+        if word.lowercased() == title?.lowercased() {
+            return false
+        }
+        //  Creates an instance of UITextChecker Class.
         let checker = UITextChecker()
+        // Defines a range covering the entire length of word.
         let range = NSRange(location: 0, length: word.utf16.count)
+        // Uses UITextChecker to find potential misspelled words in word for the English language ("en").
         let missplledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
         
+        // NSNotFound: is a constant in Objective-C that represents an invalid or non-existent index or location within a collection (like an array or string).
         return missplledRange.location == NSNotFound
+    }
+    
+    func showErrorMessage(title: String, message: String) {
+        // Display the Allert Controller.
+        let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        // to exit of the Allert Message.
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
     }
 
 }
-
