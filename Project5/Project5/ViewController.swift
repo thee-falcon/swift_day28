@@ -69,7 +69,23 @@ class ViewController: UITableViewController {
         // returns the configured cell to be displayed.
         return cell
     }
-
+    
+    override func tableView(_ tableView: UITableView, shouldShowMenuForRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+        if action == #selector(UIResponderStandardEditActions.copy(_:)) {
+            return true
+        }
+        return false
+    }
+    
+    override func tableView(_ tableView: UITableView, performAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) {
+        if action == #selector(UIResponderStandardEditActions.copy(_:)) {
+            UIPasteboard.general.string = useWords[indexPath.row]
+        }
+    }
 
     @objc func startGame() {
         title = allWords.randomElement()
