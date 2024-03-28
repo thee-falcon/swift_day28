@@ -70,10 +70,15 @@ class ViewController: UITableViewController {
         return cell
     }
     
+    // indicating that the menu(copy/paste menu) should be shown for all rows in the table view.
     override func tableView(_ tableView: UITableView, shouldShowMenuForRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
+    /*
+     If the action is copy, the method returns true, indicating that the copy action can be performed on the row.
+     For all other actions, the method returns false.
+     */
     override func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         if action == #selector(UIResponderStandardEditActions.copy(_:)) {
             return true
@@ -81,6 +86,11 @@ class ViewController: UITableViewController {
         return false
     }
     
+    /*
+     This method is called when an action is performed on a specific row in the table view. Here, you're interested in the copy action. When the copy action is performed:
+
+     The text of the cell (from the useWords array at the corresponding indexPath.row) is copied to the general pasteboard using UIPasteboard.general.string.
+     */
     override func tableView(_ tableView: UITableView, performAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) {
         if action == #selector(UIResponderStandardEditActions.copy(_:)) {
             UIPasteboard.general.string = useWords[indexPath.row]
